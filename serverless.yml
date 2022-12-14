@@ -3,7 +3,7 @@ frameworkVersion: '2 || 3'
 
 provider:
   name: aws
-  runtime: python3.8
+  runtime: python3.10
   lambdaHashingVersion: '20201221'
 
 plugins:
@@ -39,9 +39,31 @@ package:
     - './handler.py'
 
 functions:
-  hello:
-    handler: handler.hello
+  get-user:
+    handler: handler.get_user
     events:
-      - httpApi:
-          path: /
+      - http:
+          path: /users/{user_id}
           method: get
+  create-user:
+    handler: handler.create_user
+    events:
+      - http:
+          path: /users
+          method: post
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: Users
